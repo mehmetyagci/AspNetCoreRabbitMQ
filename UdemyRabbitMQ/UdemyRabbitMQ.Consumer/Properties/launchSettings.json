@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "UdemyRabbitMQ.Consumer": {
+      "commandName": "Project",
+      "commandLineArgs": "250"
+    }
+  }
+}

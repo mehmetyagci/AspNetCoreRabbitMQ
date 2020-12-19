@@ -1,0 +1,17 @@
+log=Critical
+log=Error
+log=Error
+log=Critical
+log=Error
+log=Error
+log=Critical
+log=Error
+log=Warning
+log=Info-Critical-Warning
+log=Info-Critical-Warning
+log=Critical-Error-Warning
+log=Warning-Critical-Warning
+log=Error-Error-Warning
+log=Critical-Info-Warning
+log=Warning-Warning-Warning
+log=Critical-Info-Warning

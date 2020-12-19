@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "UdemyRabbitMQ.Publisher": {
+      "commandName": "Project",
+      "commandLineArgs": "yasin"
+    }
+  }
+}

@@ -2,7 +2,7 @@
   "profiles": {
     "UdemyRabbitMQ.Publisher": {
       "commandName": "Project",
-      "commandLineArgs": "yasin"
+      "commandLineArgs": "log-1"
     }
   }
 }

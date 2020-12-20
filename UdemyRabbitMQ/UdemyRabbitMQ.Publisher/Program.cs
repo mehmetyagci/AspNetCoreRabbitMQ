@@ -19,7 +19,9 @@ namespace UdemyRabbitMQ.Publisher
                 using (var channel = connection.CreateModel())
                 {
                     // durable:true kuyruğu sağlama alıyor. PC restart bile olsa kaybolmuyor.
-                    channel.QueueDeclare("task_queue", durable: true, false, false, null);
+                    // channel.QueueDeclare("task_queue", durable: true, false, false, null);
+
+                    channel.ExchangeDeclare("logs",durable:true, type: ExchangeType.Fanout);
 
                     string message = GetMessage(args);  //"Hello World";
 
@@ -31,7 +33,9 @@ namespace UdemyRabbitMQ.Publisher
 
                         properties.Persistent = true; // Mesajınıda sağlama aldık.
 
-                        channel.BasicPublish("", routingKey: "task_queue", properties, body: bodyByte);
+                        //channel.BasicPublish("", routingKey: "task_queue", properties, body: bodyByte);
+
+                        channel.BasicPublish("logs", routingKey: "", properties, body: bodyByte);
 
                         Console.WriteLine($"Mesajınız gönderilmiştir.{message}-{i}");
                     }

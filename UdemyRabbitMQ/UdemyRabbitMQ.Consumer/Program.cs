@@ -21,26 +21,33 @@ namespace UdemyRabbitMQ.Consumer
             {
                 using (var channel = connection.CreateModel())
                 {
-                    channel.QueueDeclare("task_queue", durable: true, exclusive: false, autoDelete: false, null);
+                    //channel.QueueDeclare("task_queue", durable: true, exclusive: false, autoDelete: false, null);
+
+                    channel.ExchangeDeclare("logs", durable: true, type: ExchangeType.Fanout);
+
+                    var queueName = channel.QueueDeclare().QueueName;
+
+                    channel.QueueBind(queue: queueName, exchange: "logs", routingKey: "");
 
                     // Bana bir tane mesaj gelsin ve bu mesajı hallettikten sonra bir sonraki gelsin.
                     channel.BasicQos(prefetchSize: 0, prefetchCount: 1, false);
 
-                    Console.WriteLine("Mesajları bekliyorum...");
+                    Console.WriteLine("logları bekliyorum...");
 
                     var consumer = new EventingBasicConsumer(channel);
 
                     /// autoAck: false kuyruğu oto. silme, ben silicem.
-                    channel.BasicConsume("task_queue", autoAck: false, consumer);
+                    //channel.BasicConsume("task_queue", autoAck: false, consumer);
+                    channel.BasicConsume(queueName, false, consumer);
 
                     consumer.Received += (model, ea) =>
                     {
-                        var message = Encoding.UTF8.GetString(ea.Body.ToArray());
-                        Console.WriteLine("Mesaj alındı:" + message);
+                        var log = Encoding.UTF8.GetString(ea.Body.ToArray());
+                        Console.WriteLine("Log alındı:" + log);
 
                         int time = int.Parse(GetMessage(args));
                         Thread.Sleep(time);
-                        Console.WriteLine("Mesaj işlendi:" + message);
+                        Console.WriteLine("loglama bitti:" + log);
 
                         channel.BasicAck(ea.DeliveryTag, multiple: false); // Mesajı kuyruktan silebilirsin.
                     };

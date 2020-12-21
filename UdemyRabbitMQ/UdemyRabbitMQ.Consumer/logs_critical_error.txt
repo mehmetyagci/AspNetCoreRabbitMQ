@@ -1,0 +1,5 @@
+log=Critical-1
+log=Critical-2
+log=Error-8
+log=Critical-9
+log=Error-10

@@ -4,6 +4,15 @@ using System.Text;
 
 namespace UdemyRabbitMQ.Publisher
 {
+
+    public enum LogNames
+    {
+        Critical = 1,
+        Error = 2,
+        Info = 3,
+        Warning = 4
+    }
+
     class Program
     {
         static void Main(string[] args)
@@ -21,13 +30,17 @@ namespace UdemyRabbitMQ.Publisher
                     // durable:true kuyruğu sağlama alıyor. PC restart bile olsa kaybolmuyor.
                     // channel.QueueDeclare("task_queue", durable: true, false, false, null);
 
-                    channel.ExchangeDeclare("logs",durable:true, type: ExchangeType.Fanout);
+                    channel.ExchangeDeclare("direct-exchange",durable:true, type: ExchangeType.Direct);
 
-                    string message = GetMessage(args);  //"Hello World";
+                    Array log_name_array = Enum.GetValues(typeof(LogNames));
 
-                    for (int i = 0; i < 10; i++)
+                    for (int i = 1; i < 11; i++)
                     {
-                        var bodyByte = Encoding.UTF8.GetBytes($"{message}-{i}");
+                        Random rnd = new Random();
+
+                        LogNames log = (LogNames)log_name_array.GetValue(rnd.Next(log_name_array.Length));
+
+                        var bodyByte = Encoding.UTF8.GetBytes($"log={log.ToString()}-{i}");
 
                         var properties = channel.CreateBasicProperties();
 
@@ -35,9 +48,9 @@ namespace UdemyRabbitMQ.Publisher
 
                         //channel.BasicPublish("", routingKey: "task_queue", properties, body: bodyByte);
 
-                        channel.BasicPublish("logs", routingKey: "", properties, body: bodyByte);
+                        channel.BasicPublish("direct-exchange", routingKey: log.ToString(), properties, body: bodyByte);
 
-                        Console.WriteLine($"Mesajınız gönderilmiştir.{message}-{i}");
+                        Console.WriteLine($"log mesajı gönderilmiştir.{log.ToString()}-{i}");
                     }
                 }
             }

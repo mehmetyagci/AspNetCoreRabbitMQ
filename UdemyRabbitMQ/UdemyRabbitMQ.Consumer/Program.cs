@@ -10,7 +10,8 @@ namespace UdemyRabbitMQ.Consumer
     public enum LogNames
     {
         Critical,
-        Error
+        Error,
+        Warning
     }
 
     class Program
@@ -30,19 +31,23 @@ namespace UdemyRabbitMQ.Consumer
                 {
                     //channel.QueueDeclare("task_queue", durable: true, exclusive: false, autoDelete: false, null);
 
-                    channel.ExchangeDeclare("direct-exchange", durable: true, type: ExchangeType.Direct);
+                    channel.ExchangeDeclare("topic-exchange", durable: true, type: ExchangeType.Topic);
 
                     var queueName = channel.QueueDeclare().QueueName;
 
-                    foreach (var item in Enum.GetNames(typeof(LogNames)))
-                    {
-                        channel.QueueBind(queue: queueName, exchange: "direct-exchange", routingKey: item);
-                    }
+                    string routingKey = "#.Warning";
+
+                    channel.QueueBind(queue: queueName, exchange: "topic-exchange", routingKey: routingKey);
+
+                    //foreach (var item in Enum.GetNames(typeof(LogNames)))
+                    //{
+                    //    channel.QueueBind(queue: queueName, exchange: "topic-exchange", routingKey: item);
+                    //}
 
                     // Bana bir tane mesaj gelsin ve bu mesajı hallettikten sonra bir sonraki gelsin.
                     channel.BasicQos(prefetchSize: 0, prefetchCount: 1, false);
 
-                    Console.WriteLine("Critical ve Error logları bekliyorum...");
+                    Console.WriteLine("Custom log bekliyorum...");
 
                     var consumer = new EventingBasicConsumer(channel);
 

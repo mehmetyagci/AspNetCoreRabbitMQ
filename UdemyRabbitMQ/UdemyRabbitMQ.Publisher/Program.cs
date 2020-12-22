@@ -4,7 +4,7 @@ using System.Text;
 
 namespace UdemyRabbitMQ.Publisher
 {
-
+    // Critical.Error.Info  Info.Warning.Critical
     public enum LogNames
     {
         Critical = 1,
@@ -30,7 +30,7 @@ namespace UdemyRabbitMQ.Publisher
                     // durable:true kuyruğu sağlama alıyor. PC restart bile olsa kaybolmuyor.
                     // channel.QueueDeclare("task_queue", durable: true, false, false, null);
 
-                    channel.ExchangeDeclare("direct-exchange",durable:true, type: ExchangeType.Direct);
+                    channel.ExchangeDeclare("topic-exchange",durable:true, type: ExchangeType.Topic);
 
                     Array log_name_array = Enum.GetValues(typeof(LogNames));
 
@@ -38,9 +38,13 @@ namespace UdemyRabbitMQ.Publisher
                     {
                         Random rnd = new Random();
 
-                        LogNames log = (LogNames)log_name_array.GetValue(rnd.Next(log_name_array.Length));
+                        LogNames log1 = (LogNames)log_name_array.GetValue(rnd.Next(log_name_array.Length));
+                        LogNames log2 = (LogNames)log_name_array.GetValue(rnd.Next(log_name_array.Length));
+                        LogNames log3 = (LogNames)log_name_array.GetValue(rnd.Next(log_name_array.Length));
 
-                        var bodyByte = Encoding.UTF8.GetBytes($"log={log.ToString()}-{i}");
+                        string RoutingKey = $"{log1}.{log2}.{log3}";
+
+                        var bodyByte = Encoding.UTF8.GetBytes($"log={log1.ToString()}-{log2.ToString()}-{log3.ToString()}-{i}");
 
                         var properties = channel.CreateBasicProperties();
 
@@ -48,9 +52,9 @@ namespace UdemyRabbitMQ.Publisher
 
                         //channel.BasicPublish("", routingKey: "task_queue", properties, body: bodyByte);
 
-                        channel.BasicPublish("direct-exchange", routingKey: log.ToString(), properties, body: bodyByte);
+                        channel.BasicPublish("topic-exchange", routingKey: RoutingKey, properties, body: bodyByte);
 
-                        Console.WriteLine($"log mesajı gönderilmiştir.{log.ToString()}-{i}");
+                        Console.WriteLine($"log mesajı gönderilmiştir. mesaj:{RoutingKey}-{i}");
                     }
                 }
             }

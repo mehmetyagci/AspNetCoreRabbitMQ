@@ -1,6 +1,7 @@
 ﻿using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading;
@@ -29,43 +30,27 @@ namespace UdemyRabbitMQ.Consumer
             {
                 using (var channel = connection.CreateModel())
                 {
-                    //channel.QueueDeclare("task_queue", durable: true, exclusive: false, autoDelete: false, null);
+                    channel.ExchangeDeclare("header-exchange", durable: true, type: ExchangeType.Headers);
 
-                    channel.ExchangeDeclare("topic-exchange", durable: true, type: ExchangeType.Topic);
+                    channel.QueueDeclare("kuyruk1", false, false, false, null);
 
-                    var queueName = channel.QueueDeclare().QueueName;
+                    Dictionary<string, object> headers = new Dictionary<string, object>();
 
-                    string routingKey = "#.Warning";
+                    headers.Add("format", "pdf");
+                    headers.Add("shape", "a4");
+                    headers.Add("x-match", "any");
 
-                    channel.QueueBind(queue: queueName, exchange: "topic-exchange", routingKey: routingKey);
-
-                    //foreach (var item in Enum.GetNames(typeof(LogNames)))
-                    //{
-                    //    channel.QueueBind(queue: queueName, exchange: "topic-exchange", routingKey: item);
-                    //}
-
-                    // Bana bir tane mesaj gelsin ve bu mesajı hallettikten sonra bir sonraki gelsin.
-                    channel.BasicQos(prefetchSize: 0, prefetchCount: 1, false);
-
-                    Console.WriteLine("Custom log bekliyorum...");
+                    channel.QueueBind("kuyruk1", "header-exchange", string.Empty, headers);
 
                     var consumer = new EventingBasicConsumer(channel);
 
-                    /// autoAck: false kuyruğu oto. silme, ben silicem.
-                    //channel.BasicConsume("task_queue", autoAck: false, consumer);
-                    channel.BasicConsume(queueName, false, consumer);
+                    channel.BasicConsume("kuyruk1", false, consumer);
 
                     consumer.Received += (model, ea) =>
                     {
-                        var log = Encoding.UTF8.GetString(ea.Body.ToArray());
-                        Console.WriteLine("Log alındı:" + log);
+                        var message = Encoding.UTF8.GetString(ea.Body.ToArray());
 
-                        int time = int.Parse(GetMessage(args));
-                        Thread.Sleep(time);
-
-                        File.AppendAllText("logs_critical_error.txt", log + "\n");
-
-                        Console.WriteLine("loglama bitti:" + log);
+                        Console.WriteLine($"gelen mesaj:{message}");
 
                         channel.BasicAck(ea.DeliveryTag, multiple: false); // Mesajı kuyruktan silebilirsin.
                     };

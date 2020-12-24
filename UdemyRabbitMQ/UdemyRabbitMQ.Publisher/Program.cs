@@ -1,5 +1,6 @@
 ﻿using RabbitMQ.Client;
 using System;
+using System.Collections.Generic;
 using System.Text;
 
 namespace UdemyRabbitMQ.Publisher
@@ -29,33 +30,19 @@ namespace UdemyRabbitMQ.Publisher
                 {
                     // durable:true kuyruğu sağlama alıyor. PC restart bile olsa kaybolmuyor.
                     // channel.QueueDeclare("task_queue", durable: true, false, false, null);
+                    channel.ExchangeDeclare("header-exchange",durable:true, type: ExchangeType.Headers);
 
-                    channel.ExchangeDeclare("topic-exchange",durable:true, type: ExchangeType.Topic);
+                    var properties = channel.CreateBasicProperties();
 
-                    Array log_name_array = Enum.GetValues(typeof(LogNames));
+                    Dictionary<string, object> headers = new Dictionary<string, object>();
 
-                    for (int i = 1; i < 11; i++)
-                    {
-                        Random rnd = new Random();
+                    headers.Add("format", "pdf");
+                    headers.Add("shape", "a4");
 
-                        LogNames log1 = (LogNames)log_name_array.GetValue(rnd.Next(log_name_array.Length));
-                        LogNames log2 = (LogNames)log_name_array.GetValue(rnd.Next(log_name_array.Length));
-                        LogNames log3 = (LogNames)log_name_array.GetValue(rnd.Next(log_name_array.Length));
+                    properties.Headers = headers;
+                    Console.WriteLine("Mesaj gönderildi.");
 
-                        string RoutingKey = $"{log1}.{log2}.{log3}";
-
-                        var bodyByte = Encoding.UTF8.GetBytes($"log={log1.ToString()}-{log2.ToString()}-{log3.ToString()}-{i}");
-
-                        var properties = channel.CreateBasicProperties();
-
-                        properties.Persistent = true; // Mesajınıda sağlama aldık.
-
-                        //channel.BasicPublish("", routingKey: "task_queue", properties, body: bodyByte);
-
-                        channel.BasicPublish("topic-exchange", routingKey: RoutingKey, properties, body: bodyByte);
-
-                        Console.WriteLine($"log mesajı gönderilmiştir. mesaj:{RoutingKey}-{i}");
-                    }
+                    channel.BasicPublish("header-exchange", string.Empty, properties, Encoding.UTF8.GetBytes("header mesajım"));
                 }
             }
 

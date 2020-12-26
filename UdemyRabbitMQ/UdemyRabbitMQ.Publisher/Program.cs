@@ -1,4 +1,5 @@
-﻿using RabbitMQ.Client;
+﻿using Newtonsoft.Json;
+using RabbitMQ.Client;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -30,7 +31,7 @@ namespace UdemyRabbitMQ.Publisher
                 {
                     // durable:true kuyruğu sağlama alıyor. PC restart bile olsa kaybolmuyor.
                     // channel.QueueDeclare("task_queue", durable: true, false, false, null);
-                    channel.ExchangeDeclare("header-exchange",durable:true, type: ExchangeType.Headers);
+                    channel.ExchangeDeclare("header-exchange", durable: true, type: ExchangeType.Headers);
 
                     var properties = channel.CreateBasicProperties();
 
@@ -40,9 +41,15 @@ namespace UdemyRabbitMQ.Publisher
                     headers.Add("shape", "a4");
 
                     properties.Headers = headers;
+
+                    User u = new User() { Id = 1, Name = "mehmet", Email = "myagci@gmail.com", Password = "1234" };
+                    string userSerialize = JsonConvert.SerializeObject(u);
+                    Console.WriteLine("userSerialize:" + userSerialize);
+
                     Console.WriteLine("Mesaj gönderildi.");
 
-                    channel.BasicPublish("header-exchange", string.Empty, properties, Encoding.UTF8.GetBytes("header mesajım"));
+                    //channel.BasicPublish("header-exchange", string.Empty, properties, Encoding.UTF8.GetBytes("header mesajım"));
+                    channel.BasicPublish("header-exchange", string.Empty, properties, Encoding.UTF8.GetBytes(userSerialize));
                 }
             }
 

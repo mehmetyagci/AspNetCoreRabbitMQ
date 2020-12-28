@@ -25,26 +25,25 @@ namespace Udemy_Word_To_Pdf.Consumer
                 attach.ContentDisposition.FileName = $"{fileName}.pdf";
 
                 MailMessage mailMessage = new MailMessage();
+                SmtpClient smtpClient = new SmtpClient("smtp.gmail.com");
 
                 mailMessage.From = new MailAddress("mehmetyagci53@gmail.com");
                 mailMessage.To.Add(email);
                 mailMessage.Subject = "Pdf Dosyası oluşturuldu.";
                 mailMessage.Body = "pdf dosyanız ektedir.";
 
-                mailMessage.IsBodyHtml = false;
+                mailMessage.IsBodyHtml = true;
 
                 mailMessage.Attachments.Add(attach);
 
-                using (SmtpClient smtpClient = new SmtpClient())
-                {
-                    smtpClient.Host = "smtp.gmail.com";
-                    smtpClient.EnableSsl = true;
-                    NetworkCredential NetworkCred = new NetworkCredential("mehmetyagci53@gmail.com", "Mhm.571622");
-                    smtpClient.UseDefaultCredentials = true;
-                    smtpClient.Credentials = NetworkCred;
-                    smtpClient.Port = 587;
-                    smtpClient.Send(mailMessage);
-                }
+
+                //smtpClient.Host = "smtp.gmail.com";
+                smtpClient.EnableSsl = true;
+                NetworkCredential NetworkCred = new NetworkCredential("mehmetyagci53@gmail.com", "Mhm.571622");
+                smtpClient.UseDefaultCredentials = true;
+                smtpClient.Credentials = NetworkCred;
+                smtpClient.Port = 587;
+                smtpClient.Send(mailMessage);
 
                 Console.WriteLine($"Sonuç: {email} adresine gönderilmiştir.");
 
